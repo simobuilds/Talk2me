@@ -1,7 +1,6 @@
 const httpServer = require("http").createServer();
-const Redis = require("ioredis");
 const bcrypt = require("bcryptjs");
-const redisClient = new Redis();
+const redisClient = require("./redisClient");
 const io = require("socket.io")(httpServer, {
   cors: {
     origin: "http://localhost:8080",
