@@ -1,0 +1,1 @@
+This folder originally contained binary font files (e.g., Lato-Regular.ttf) that were not copied by the automated tool. If you need the exact font(s), copy them manually from the original public/fonts directory.
