@@ -4,17 +4,17 @@
     <div class="ambient ambient-right"></div>
 
     <section class="hero-copy">
-      <p class="eyebrow">Private Messaging V2</p>
+      <p class="eyebrow">Nothing to see here</p>
       <h1>Start a conversation that feels intentional.</h1>
       <p class="lead">
-        Pick a username for this tab and step into a cleaner local messaging
-        workspace with persistent sessions and live delivery.
+        Pick a username for this session and step into a cleaner local messaging
+        workspace.
       </p>
 
       <div class="feature-list">
-        <div class="feature-pill">Live Socket.IO delivery</div>
-        <div class="feature-pill">Redis-backed sessions</div>
-        <div class="feature-pill">Tab-specific identities</div>
+        <div class="feature-pill">Live Chat</div>
+        <div class="feature-pill">Nothing else</div>
+        
       </div>
     </section>
 
@@ -24,7 +24,7 @@
         <h2>{{ authMode === "register" ? "Create your account" : "Sign in to continue" }}</h2>
         <p class="card-text">
           Use a username and an alphanumeric password between 6 and 28 characters.
-          You can also save an optional email for development.
+          You can also save an optional email.
         </p>
       </div>
 
@@ -217,9 +217,14 @@ export default {
   position: relative;
   overflow: hidden;
   background:
+    linear-gradient(115deg, rgba(245, 239, 226, 0.92) 8%, rgba(233, 220, 201, 0.76) 38%, rgba(220, 232, 228, 0.58) 100%),
     radial-gradient(circle at top left, rgba(184, 92, 56, 0.16), transparent 34%),
     radial-gradient(circle at bottom right, rgba(34, 88, 122, 0.18), transparent 30%),
+    url("/Renaissance-Artist-Donatello.jpg"),
     linear-gradient(135deg, #f5efe2 0%, #e9dcc9 46%, #dce8e4 100%);
+  background-position: center, top left, bottom right, center center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-size: auto, auto, auto, cover, cover;
 }
 
 .ambient {
