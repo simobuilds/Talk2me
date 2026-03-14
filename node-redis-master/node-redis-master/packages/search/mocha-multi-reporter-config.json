@@ -1,8 +1,0 @@
-{
-  "reporterEnabled": "spec, mocha-junit-reporter",
-  "mochaJunitReporterReporterOptions": {
-    "mochaFile": "../../junit-results/search.xml",
-    "toConsole": false,
-    "testsuitesTitle": "@redis/search"
-  }
-}

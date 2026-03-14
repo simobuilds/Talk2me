@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: private-messaging-app
+    runtime: node
+    buildCommand: npm ci && npm ci --prefix server && npm run build
+    startCommand: npm start --prefix server
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: private-messaging-redis
+          property: connectionString
+
+  - type: keyvalue
+    name: private-messaging-redis
+    ipAllowList: []

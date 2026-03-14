@@ -1,8 +1,0 @@
-{
-  "reporterEnabled": "spec, mocha-junit-reporter",
-  "mochaJunitReporterReporterOptions": {
-    "mochaFile": "../../junit-results/entraid.xml",
-    "toConsole": false,
-    "testsuitesTitle": "@redis/entraid"
-  }
-}

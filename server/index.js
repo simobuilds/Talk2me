@@ -1,9 +1,164 @@
-const httpServer = require("http").createServer();
+const fs = require("fs");
+const path = require("path");
 const bcrypt = require("bcryptjs");
 const redisClient = require("./redisClient");
+const isDevEnvironment = process.env.NODE_ENV !== "production";
+const configuredCorsOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowedCorsOrigins = isDevEnvironment
+  ? [...new Set(["http://localhost:8080", ...configuredCorsOrigins])]
+  : configuredCorsOrigins;
+const DIST_DIR = path.resolve(__dirname, "..", "dist");
+const INDEX_FILE = path.join(DIST_DIR, "index.html");
+const MIME_TYPES = {
+  ".css": "text/css; charset=utf-8",
+  ".html": "text/html; charset=utf-8",
+  ".ico": "image/x-icon",
+  ".js": "text/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".map": "application/json; charset=utf-8",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+  ".txt": "text/plain; charset=utf-8",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+};
+
+function isOriginAllowed(origin) {
+  if (!origin) {
+    return true;
+  }
+
+  if (allowedCorsOrigins.length === 0) {
+    return true;
+  }
+
+  return allowedCorsOrigins.includes(origin);
+}
+
+function sendJson(res, statusCode, payload) {
+  const body = JSON.stringify(payload);
+  res.writeHead(statusCode, {
+    "Content-Length": Buffer.byteLength(body),
+    "Content-Type": "application/json; charset=utf-8",
+  });
+  res.end(body);
+}
+
+function sendText(res, statusCode, body) {
+  res.writeHead(statusCode, {
+    "Content-Length": Buffer.byteLength(body),
+    "Content-Type": "text/plain; charset=utf-8",
+  });
+  res.end(body);
+}
+
+async function pingRedis() {
+  const pingPromise = redisClient.ping();
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error("timeout")), 500);
+  });
+
+  return Promise.race([pingPromise, timeoutPromise]);
+}
+
+async function serveFile(req, res, filePath) {
+  const stat = await fs.promises.stat(filePath);
+  res.writeHead(200, {
+    "Content-Length": stat.size,
+    "Content-Type": MIME_TYPES[path.extname(filePath).toLowerCase()] || "application/octet-stream",
+  });
+
+  if (req.method === "HEAD") {
+    res.end();
+    return;
+  }
+
+  fs.createReadStream(filePath).pipe(res);
+}
+
+async function handleHttpRequest(req, res) {
+  const requestUrl = new URL(req.url || "/", "http://localhost");
+  const pathname = decodeURIComponent(requestUrl.pathname);
+
+  if (pathname === "/socket.io" || pathname.startsWith("/socket.io/")) {
+    return;
+  }
+
+  if (pathname === "/health") {
+    try {
+      const pong = await pingRedis();
+      sendJson(res, 200, { ok: true, redis: { ok: true, pong } });
+    } catch (error) {
+      sendJson(res, 503, {
+        ok: false,
+        redis: {
+          ok: false,
+          error: error && error.message ? error.message : String(error),
+        },
+      });
+    }
+    return;
+  }
+
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    sendText(res, 404, "Not found");
+    return;
+  }
+
+  try {
+    await fs.promises.access(INDEX_FILE, fs.constants.R_OK);
+  } catch {
+    sendText(res, 503, "Frontend build not found.");
+    return;
+  }
+
+  const relativePath = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
+  const candidatePath = path.resolve(DIST_DIR, relativePath);
+  if (!candidatePath.startsWith(DIST_DIR)) {
+    sendText(res, 403, "Forbidden");
+    return;
+  }
+
+  try {
+    const stat = await fs.promises.stat(candidatePath);
+    if (stat.isFile()) {
+      await serveFile(req, res, candidatePath);
+      return;
+    }
+  } catch {
+    if (path.extname(relativePath)) {
+      sendText(res, 404, "Not found");
+      return;
+    }
+  }
+
+  await serveFile(req, res, INDEX_FILE);
+}
+
+const httpServer = require("http").createServer((req, res) => {
+  handleHttpRequest(req, res).catch((error) => {
+    console.error("Failed to handle HTTP request", error);
+    if (!res.headersSent) {
+      sendText(res, 500, "Internal server error");
+    } else {
+      res.end();
+    }
+  });
+});
+
 const io = require("socket.io")(httpServer, {
   cors: {
-    origin: "http://localhost:8080",
+    origin(origin, callback) {
+      if (isOriginAllowed(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Origin not allowed by CORS"));
+    },
   },
   adapter: require("socket.io-redis")({
     pubClient: redisClient,
@@ -23,7 +178,6 @@ const messageStore = new RedisMessageStore(redisClient);
 const { RedisUserStore } = require("./userStore");
 const userStore = new RedisUserStore(redisClient);
 const MAX_CREDENTIAL_LENGTH = 28;
-const isDevEnvironment = process.env.NODE_ENV !== "production";
 const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // rate limiting for login attempts

@@ -23,6 +23,7 @@ debug.log*
 *.sqlite3
 /.env
 /.env.*
+!.env.example
 /.env.local
 /.DS_Store
 /.history
@@ -56,3 +57,4 @@ pnpm-debug.log*
 *.sln
 *.sw?
 package-lock.json
+node-redis-master/

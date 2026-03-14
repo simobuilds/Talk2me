@@ -245,7 +245,9 @@ export default {
       try {
         sessionStorage.removeItem('sessionID');
         sessionStorage.removeItem('username');
-      } catch (e) {}
+      } catch (e) {
+        void e;
+      }
       socket.disconnect();
       this.$emit('logged-out');
     },
@@ -522,5 +524,4 @@ export default {
 .search-username { margin-right: 12px; color: white; }
 .start-chat { padding: 6px 10px; border-radius: 6px; background: #1164a3; color: white; border: none; cursor: pointer; }
 .search-result.active { background: rgba(255,255,255,0.04); }
-</style>
 </style>
