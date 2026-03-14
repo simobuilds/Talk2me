@@ -1,5 +1,5 @@
 <template>
-  <div class="select-username">
+  <div class="select-username" :style="backgroundArtStyle">
     <div class="ambient ambient-left"></div>
     <div class="ambient ambient-right"></div>
 
@@ -166,6 +166,11 @@ export default {
     };
   },
   computed: {
+    backgroundArtStyle() {
+      return {
+        "--hero-art": `url(${process.env.BASE_URL}Renaissance-Artist-Donatello.jpg)`,
+      };
+    },
     isValid() {
       return (
         this.username.length > 2 &&
@@ -220,7 +225,7 @@ export default {
     linear-gradient(115deg, rgba(245, 239, 226, 0.92) 8%, rgba(233, 220, 201, 0.76) 38%, rgba(220, 232, 228, 0.58) 100%),
     radial-gradient(circle at top left, rgba(184, 92, 56, 0.16), transparent 34%),
     radial-gradient(circle at bottom right, rgba(34, 88, 122, 0.18), transparent 30%),
-    url("/Renaissance-Artist-Donatello.jpg"),
+    var(--hero-art),
     linear-gradient(135deg, #f5efe2 0%, #e9dcc9 46%, #dce8e4 100%);
   background-position: center, top left, bottom right, center center, center;
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
