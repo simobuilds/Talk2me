@@ -25,9 +25,7 @@ class InMemoryMessageStore extends MessageStore {
   }
 }
 
-const CONVERSATION_TTL = process.env.CONVERSATION_TTL
-  ? parseInt(process.env.CONVERSATION_TTL, 10)
-  : 24 * 60 * 60;
+const CONVERSATION_TTL = 0;
 
 class RedisMessageStore extends MessageStore {
   constructor(redisClient) {
