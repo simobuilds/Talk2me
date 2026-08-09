@@ -168,7 +168,7 @@ export default {
   computed: {
     backgroundArtStyle() {
       return {
-        "--hero-art": `url(${process.env.BASE_URL}Renaissance-Artist-Donatello.jpg)`,
+        "--hero-art": `url(${process.env.BASE_URL}landingbackground.png)`,
       };
     },
     isValid() {
